@@ -1,0 +1,6 @@
+# OpenAI Proxy API Configuration
+PROXY_API_KEY=your_proxy_api_key_here
+PROXY_API_BASE=https://api.proxyapi.ru/openai/v1
+
+# Optional: Logging level (DEBUG, INFO, WARNING, ERROR)
+# LOG_LEVEL=INFO 

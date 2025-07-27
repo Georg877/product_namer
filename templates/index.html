@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Namer Agent - Генератор названий продуктов</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results-header {
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+
+        .results-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .results-content {
+            background: white;
+            border: 2px solid #28a745;
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+        }
+
+        .name-card {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .name-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .name-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .name-reason {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .input-section {
+                padding: 20px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lightbulb"></i> Product Namer Agent</h1>
+            <p>Генератор креативных названий для ваших продуктов</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2><i class="fas fa-edit"></i> Введите данные продукта</h2>
+                
+                <div class="input-group">
+                    <label for="url">URL страницы с описанием продукта:</label>
+                    <input type="url" id="url" placeholder="https://example.com/product-page" />
+                </div>
+
+                <div class="input-group">
+                    <label for="description">Или введите описание продукта вручную:</label>
+                    <textarea id="description" placeholder="Опишите ваш продукт: его особенности, преимущества, целевую аудиторию..."></textarea>
+                </div>
+
+                <button class="submit-btn" onclick="generateNames()">
+                    <i class="fas fa-magic"></i> Сгенерировать названия
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Генерируем креативные названия...</p>
+                <p><small>Это может занять несколько секунд</small></p>
+            </div>
+
+            <div class="results-section" id="results">
+                <div class="results-header">
+                    <h2><i class="fas fa-check-circle"></i> Результаты генерации</h2>
+                    <p>Вот 5 креативных названий для вашего продукта:</p>
+                </div>
+                <div class="results-content" id="resultsContent">
+                    <!-- Результаты будут добавлены здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedNames = [];
+
+        async function generateNames() {
+            const url = document.getElementById('url').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const submitBtn = document.querySelector('.submit-btn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+
+            // Валидация
+            if (!url && !description) {
+                showError('Пожалуйста, введите URL или описание продукта');
+                return;
+            }
+
+            // Показываем загрузку
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерация...';
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            hideMessages();
+
+            try {
+                const response = await fetch('/api/generate-names', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, description })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    generatedNames = data.names;
+                    displayResults(data.names);
+                    showSuccess(`Успешно сгенерировано ${data.names.length} названий!`);
+                } else {
+                    showError(data.error || 'Произошла ошибка при генерации названий');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Ошибка соединения с сервером');
+            } finally {
+                // Скрываем загрузку
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-magic"></i> Сгенерировать названия';
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResults(names) {
+            const resultsContent = document.getElementById('resultsContent');
+            const results = document.getElementById('results');
+
+            let html = '';
+            names.forEach((nameData, index) => {
+                html += `
+                    <div class="name-card">
+                        <div class="name-title">
+                            <i class="fas fa-star"></i> ${nameData.name}
+                        </div>
+                        <div class="name-reason">
+                            <strong>Почему это название подходит:</strong><br>
+                            ${nameData.reason}
+                        </div>
+                        <button class="copy-btn" onclick="copyToClipboard('${nameData.name}')">
+                            <i class="fas fa-copy"></i> Копировать название
+                        </button>
+                    </div>
+                `;
+            });
+
+            // Добавляем статистику
+            html += `
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">${names.length}</div>
+                        <div class="stat-label">Названий создано</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Уникальность</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">AI</div>
+                        <div class="stat-label">Powered by GPT-4o</div>
+                    </div>
+                </div>
+            `;
+
+            resultsContent.innerHTML = html;
+            results.style.display = 'block';
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Показываем уведомление
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    animation: slideIn 0.3s ease;
+                `;
+                notification.innerHTML = '<i class="fas fa-check"></i> Название скопировано!';
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+            });
+        }
+
+        function showError(message) {
+            hideMessages();
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            document.querySelector('.input-section').appendChild(errorDiv);
+        }
+
+        function showSuccess(message) {
+            hideMessages();
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.querySelector('.input-section').appendChild(successDiv);
+        }
+
+        function hideMessages() {
+            const messages = document.querySelectorAll('.error-message, .success-message');
+            messages.forEach(msg => msg.remove());
+        }
+
+        // Добавляем CSS анимацию
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Обработка Enter в полях ввода
+        document.getElementById('url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') generateNames();
+        });
+
+        document.getElementById('description').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) generateNames();
+        });
+    </script>
+</body>
+</html> 
